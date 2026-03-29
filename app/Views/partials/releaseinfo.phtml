@@ -1,0 +1,180 @@
+<?php
+$releases = [
+  //---------------------------------------------------------------------------
+  [
+    'version' => '6.2.0',
+    'date' => '2025-11-17',
+    'info' => 'This is an improvement release.',
+    'bugfixes' => [
+      [ 'summary' => 'Several minor bugfixes', 'issue' => '' ],
+    ],
+    'features' => [
+    ],
+    'improvements' => [
+      [ 'summary' => 'Made several changes to support hosting on Linux better', 'issue' => '' ],
+    ],
+    'removals' => [
+    ],
+  ],
+  //---------------------------------------------------------------------------
+  [
+    'version' => '6.1.1',
+    'date' => '2025-10-24',
+    'info' => 'This is a bugfix release.',
+    'bugfixes' => [
+      [ 'summary' => 'Fixed GET/POST capitalization and partial view paths', 'issue' => 'https://github.com/glewe/codi/issues/4' ],
+    ],
+    'features' => [
+    ],
+    'improvements' => [
+    ],
+    'removals' => [
+    ],
+  ],
+  //---------------------------------------------------------------------------
+  [
+    'version' => '6.1.0',
+    'date' => '2025-10-23',
+    'info' => 'This is a minor update and bugfix release.',
+    'bugfixes' => [
+      [ 'summary' => 'Fixed Table \'codi.auth_users\' doesn\'t exist', 'issue' => 'https://github.com/glewe/codi/issues/4' ],
+    ],
+    'features' => [
+      [ 'summary' => 'Added Matomo analytics support', 'issue' => '' ],
+    ],
+    'improvements' => [
+      [ 'summary' => 'Updated Bootstrap to 5.3.8', 'issue' => '' ],
+      [ 'summary' => 'Updated CodeIgniter to 4.6.3', 'issue' => '' ],
+      [ 'summary' => 'Updated Font Awesome to 7.1.0', 'issue' => '' ],
+    ],
+    'removals' => [
+    ],
+  ],
+  //---------------------------------------------------------------------------
+  [
+    'version' => '6.0.0',
+    'date' => '2025-08-01',
+    'info' => 'This is a new major release integrating the ThirdParty modules CI4-Auth and CI4-Lic into the root application. This makes it easier to maintain and update the application, as all modules are now part of the main codebase.',
+    'bugfixes' => [],
+    'features' => [
+    ],
+    'improvements' => [
+    ],
+    'removals' => [
+    ],
+  ],
+  //---------------------------------------------------------------------------
+  [
+    'version' => '5.2.0',
+    'date' => '2025-07-10',
+    'info' => 'This is a new minor release updating CodeIgniter and add-ons:',
+    'bugfixes' => [],
+    'features' => [
+    ],
+    'improvements' => [
+      [ 'summary' => 'Update to Codeigniter 4.6.1', 'issue' => '' ],
+      [ 'summary' => 'Update to Bootstrap 5.3.7', 'issue' => '' ],
+      [ 'summary' => 'Update to Bootstrap Icons 1.13.1', 'issue' => '' ],
+      [ 'summary' => 'Update to ChartJs 4.5.0', 'issue' => '' ],
+      [ 'summary' => 'Update to Datatables 2.3.2', 'issue' => '' ],
+      [ 'summary' => 'Update to FontAwesome 6.7.2', 'issue' => '' ],
+    ],
+    'removals' => [
+    ],
+  ],
+  //---------------------------------------------------------------------------
+  [
+    'version' => '5.1.0',
+    'date' => '2025-02-28',
+    'info' => 'This is a new minor release updating to CodeIgniter 4.6 and PHP 8.4 compatibility:',
+    'bugfixes' => [],
+    'features' => [
+      [ 'summary' => 'Added TinyMCE as a form element option', 'issue' => '' ],
+    ],
+    'improvements' => [
+      [ 'summary' => 'Update to Codeigniter 4.6', 'issue' => '' ],
+      [ 'summary' => 'PHP 8.4+ compatibiity', 'issue' => '' ],
+      [ 'summary' => 'Update robthree/twofactorauth to ^3.0', 'issue' => '' ],
+      [ 'summary' => 'Update phpunit/phpunit to ^12.0', 'issue' => '' ],
+      [ 'summary' => 'SonarQube code quality changes', 'issue' => '' ],
+    ],
+    'removals' => [
+    ],
+  ],
+  //---------------------------------------------------------------------------
+  [
+    'version' => '5.0.0',
+    'date' => '2024-11-02',
+    'info' => 'This is a new major release of CODI based on CodeIgniter 4:',
+    'bugfixes' => [],
+    'features' => [
+      [ 'summary' => 'Lightbox2 replaces Magnific Popup', 'issue' => '' ],
+      [ 'summary' => 'Highlight.js replaces Syntaxhighlighter', 'issue' => '' ],
+      [ 'summary' => 'Sample page', 'issue' => '' ],
+      [ 'summary' => 'Bootstrap 5 Library', 'issue' => '' ],
+      [ 'summary' => 'Dark mode / Light mode', 'issue' => '' ],
+      [ 'summary' => 'Navbar / Sidebar', 'issue' => '' ],
+    ],
+    'improvements' => [
+      [ 'summary' => 'PHP 8.2+ adjustments', 'issue' => '' ],
+      [ 'summary' => 'SonarQube code quality changes', 'issue' => '' ],
+    ],
+    'removals' => [
+      [ 'summary' => 'Removed CKEditor (annoying and not secure enough)', 'issue' => '' ],
+    ],
+  ],
+];
+?>
+<!-- Release Info -->
+<ul class="timeline">
+  <?php foreach ($releases as $release) { ?>
+    <li>
+      <div class="card mb-3">
+        <div class="card-header"><i class="bi bi-box bi-lg me-3"></i>Release <?= $release['version'] ?><span class="float-end"><i class="bi bi-calendar bi-lg me-3"></i><?= $release['date'] ?></span></div>
+        <div class="card-body">
+
+          <?php if (strlen($release['info'])) { ?>
+            <p><?= $release['info'] ?></p>
+          <?php } ?>
+
+          <?php if (count($release['bugfixes'])) { ?>
+            <h6><?= lang('App.about.bugfixes') ?></h6>
+            <ul>
+              <?php foreach ($release['bugfixes'] as $bugfix) { ?>
+                <li><?= $bugfix['summary'] ?><?= (strlen($bugfix['issue']) ? ' ( <a href="' . $bugfix['issue'] . '" target="_blank"><i class="bi bi-box-arrow-up-right me-1"></i>Issue</a> )' : '') ?></li>
+              <?php } ?>
+            </ul>
+          <?php } ?>
+
+          <?php if (count($release['improvements'])) { ?>
+            <h6><?= lang('App.about.improvements') ?></h6>
+            <ul>
+              <?php foreach ($release['improvements'] as $improvement) { ?>
+                <li><?= $improvement['summary'] ?><?= (strlen($improvement['issue']) ? ' ( <a href="' . $improvement['issue'] . '" target="_blank"><i class="bi-box-arrow-up-right me-1"></i>Issue</a> )' : '') ?></li>
+              <?php } ?>
+            </ul>
+          <?php } ?>
+
+          <?php if (count($release['features'])) { ?>
+            <h6><?= lang('App.about.newFeatures') ?></h6>
+            <ul>
+              <?php foreach ($release['features'] as $feature) { ?>
+                <li><?= $feature['summary'] ?><?= (strlen($feature['issue']) ? ' ( <a href="' . $feature['issue'] . '" target="_blank"><i class="bi-box-arrow-up-right me-1"></i>Issue</a> )' : '') ?></li>
+              <?php } ?>
+            </ul>
+          <?php } ?>
+
+          <?php if (count($release['removals'])) { ?>
+            <h6><?= lang('App.about.removals') ?></h6>
+            <ul>
+              <?php foreach ($release['removals'] as $removal) { ?>
+                <li><?= $removal['summary'] ?><?= (strlen($removal['issue']) ? ' ( <a href="' . $removal['issue'] . '" target="_blank"><i class="bi-box-arrow-up-right me-1"></i>Issue</a> )' : '') ?></li>
+              <?php } ?>
+            </ul>
+          <?php } ?>
+
+        </div>
+      </div>
+    </li>
+  <?php } ?>
+</ul>
