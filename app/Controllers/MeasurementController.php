@@ -27,6 +27,8 @@ class MeasurementController extends BaseController {
         $model = model(MeasurementModel::class);
         $userModel = model(UserModel::class);
 
+        $orderId = $this->request->getGet('order_id');
+
         $targetId = in_roles('Tailor') ? $userId : user_id();
 
         if (empty($targetId)) {
@@ -38,6 +40,8 @@ class MeasurementController extends BaseController {
             'targetUser'  => $userModel->find($targetId),
             'tailorCanEditMeasurements' => in_roles('Tailor')
                 && $this->tailorCanEditCustomerMeasurements((int) user_id(), (int) $targetId),
+
+            'orderId' => $orderId
         ];
 
         return $this->_render('measurement', $data);
