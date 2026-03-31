@@ -9,9 +9,15 @@
             <a href="<?= base_url('orders/create') ?>" class="btn btn-primary me-2">Create Order</a>
             <a href="<?= base_url('orders') ?>" class="btn btn-secondary">My Orders</a>
         <?php elseif (in_roles('Tailor')): ?>
-            <button type="button" class="btn btn-outline-secondary me-2" onclick="window.history.back();">
-                <i class="bi bi-arrow-left"></i> Back
-            </button>
+            <?php if (!empty($orderId)): ?>
+                <a href="<?= base_url('orders/customer_details2/' . (int)$orderId) ?>" class="btn btn-outline-secondary me-2">
+                    <i class="bi bi-arrow-left"></i> Back to Order
+                </a>
+            <?php else: ?>
+                <a href="<?= base_url('orders') ?>" class="btn btn-outline-secondary me-2">
+                    <i class="bi bi-arrow-left"></i> Back to Orders
+                </a>
+            <?php endif; ?>
         <?php endif; ?>
     </div>
     <div class="card shadow border-0">
@@ -24,10 +30,12 @@
         <div class="card-body bg-light">
             <?php if (in_roles('Tailor') && !empty($tailorCanEditMeasurements)): ?>
                 <div class="alert alert-warning border-0 shadow-sm mb-4" role="alert">
-                    <strong>Perhatian / Notice:</strong>
-                    Pelanggan mungkin tidak mengukur badan sendiri dengan tepat walaupun ada panduan.
-                    Pastikan sebelum mengemas kini ukuran pelanggan <strong><?= esc($targetUser->username) ?></strong>.
-                    <span class="d-block text-muted small mt-1">Customers may not measure themselves accurately even with the guide. Confirm values before saving.</span>
+                    <strong>Notice / Perhatian:</strong>
+                    Customers may not measure themselves accurately even with the guide. 
+                    Confirm values before saving for customer <strong><?= esc($targetUser->username) ?></strong>.
+                    
+                    <span class="d-block text-muted small mt-1">Pelanggan mungkin tidak mengukur badan sendiri dengan tepat walaupun ada panduan.
+                    Pastikan sebelum mengemas kini ukuran pelanggan <strong><?= esc($targetUser->username) ?></strong>.</span>
                 </div>
             <?php elseif (in_roles('Tailor') && empty($tailorCanEditMeasurements)): ?>
                 <div class="alert alert-info border-0 shadow-sm mb-4" role="alert">
