@@ -13,7 +13,29 @@
             <button type="button" class="btn btn-outline-secondary" onclick="window.history.back();">
                 <i class="bi bi-arrow-left"></i> Back
             </button>
-            <a href="<?= base_url('orders/create/' . $user->id) ?>" class="btn btn-primary">Ask for appointment</a>
+            <?php 
+                // Get the source and ID data from the URL
+                $from = service('request')->getGet('from');
+                $order_id = service('request')->getGet('order_id');
+                $bid_id = service('request')->getGet('bid_id');
+            ?>
+
+            <div>
+                <?php if ($from === 'bids'): ?>
+                    <form action="<?= base_url('orders/accept_bid') ?>" method="post">
+                        <?= csrf_field() ?>
+                        <input type="hidden" name="order_id" value="<?= esc($order_id) ?>">
+                        <input type="hidden" name="bid_id" value="<?= esc($bid_id) ?>">
+                        <button type="submit" class="btn btn-success ">
+                            Accept This Tailor
+                        </button>
+                    </form>
+                <?php else: ?>
+                    <a href="<?= base_url('orders/create/' . $user->id) ?>" class="btn btn-primary">
+                        Ask for appointment
+                    </a>
+                <?php endif; ?>
+            </div>
         </div>
     </div>
 

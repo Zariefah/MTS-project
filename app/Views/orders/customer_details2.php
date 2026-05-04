@@ -51,7 +51,7 @@
 
                 <div class="tab-pane fade" id="measurement-pane" role="tabpanel" aria-labelledby="measurement-tab">
                     <div class="mb-3">
-                        <a href="<?= base_url('measurements/' . (int) $customer->id) ?>" class="btn btn-sm btn-outline-primary">
+                        <a href="<?= base_url('measurements/' . (int) $customer->id . '?order_id=' . $order['id']) ?>" class="btn btn-sm btn-outline-primary">
                             <i class="bi bi-pencil-square me-1"></i> Edit full measurement form
                         </a>
                     </div>
@@ -87,7 +87,7 @@
         </div>
 
         <div class="card-footer bg-white text-end p-3">
-            <button type="button" class="btn btn-secondary me-2" onclick="history.back()">Back</button>
+            <a href="<?= base_url('orders/my_orders') ?>" class="btn btn-secondary me-2">Back</a>
         </div>
     </div>
 </div>

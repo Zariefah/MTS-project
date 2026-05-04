@@ -10,7 +10,7 @@
             <div class="card shadow-sm border-primary mb-3">
                 <div class="card-body">
                     <h5 class="card-title mb-0">
-                        <a href="<?= base_url('orders/tailor_details/' . (int) $b['tailor_id']) ?>" class="fw-semibold text-decoration-none">
+                        <a href="<?= base_url('orders/tailor_details/' . (int) $b['tailor_id'] . '?from=bids&order_id=' . $order['id'] . '&bid_id=') ?>" class="fw-semibold text-decoration-none">
                             <?= esc($b['company_name']) ?>
                         </a>
                     </h5>

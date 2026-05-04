@@ -26,7 +26,7 @@
                     <?php foreach($tailors as $t): ?>
                     <tr>
                         <td>
-                            <a href="<?= base_url('orders/tailor_details/' . $t->id) ?>" class="fw-semibold text-decoration-none">
+                            <a href="<?= base_url('orders/tailor_details/' . $t->id . '?from=search_tailor') ?>" class="fw-semibold text-decoration-none">
                                 <?= esc($t->options['organization'] ?? $t->username) ?>
                             </a>
                         </td>
