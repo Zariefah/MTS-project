@@ -32,7 +32,7 @@
                             <table class="table table-sm table-borderless">
                                 <tr><td><strong>Username:</strong></td><td><?= $customer->username ?></td></tr>
                                 <tr><td><strong>Email:</strong></td><td><?= $customer->email ?></td></tr>
-                                <tr><td><strong>Phone:</strong></td><td><?= $customer->mobile ?? 'N/A' ?></td></tr>
+                                <tr><td><strong>Phone:</strong></td><td><?= $customer->mobile ?? '+6017-4700724' ?></td></tr>
                                 <tr><td><strong>Region:</strong></td><td><?= $customer->region ?></td></tr>
                                 <tr><td><strong>Address:</strong></td><td><?= $customer->address ?></td></tr>
                             </table>

@@ -338,7 +338,7 @@
 
       <div class="card-footer">
         <button type="submit" class="btn btn-primary"><?= lang('Auth.btn.submit') ?></button>
-        <a class="btn btn-secondary float-end" href="<?= base_url() ?>/users"><?= lang('Auth.btn.cancel') ?></a>
+        <a class="btn btn-secondary float-end" href="<?= base_url() ?>"><?= lang('Auth.btn.cancel') ?></a>
       </div>
     </div>
   </form>

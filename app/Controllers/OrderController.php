@@ -348,7 +348,7 @@ class OrderController extends BaseController {
     // For CUSTOMER: See their assigned tailors per order
     public function myTailorsList() {
         $data['orders'] = model(OrderModel::class)
-            ->select('orders.id, orders.status, orders.completion_date, orders.pickup_date, users.username as tailor_name')
+            ->select('orders.id, orders.status, orders.completion_date, orders.pickup_date, orders.selected_tailor_id, users.username as tailor_name')
             ->join('users', 'users.id = orders.selected_tailor_id', 'left')
             ->where('orders.customer_id', user_id())
             ->findAll();

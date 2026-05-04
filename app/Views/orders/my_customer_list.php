@@ -21,7 +21,11 @@
         <tbody>
             <?php foreach ($orders as $o): ?>
             <tr>
-                <td><?= $o['customer_name'] ?? '-' ?></td>
+                <td>
+                    <a href="<?= base_url('orders/customer_details2/' . $o['id']) ?>">
+                        <?= $o['customer_name'] ?? '-' ?>
+                    </a>
+                </td>
                 <td>#<?= $o['id'] ?></td>
                 <td><?= $o['completion_date'] ?? '-' ?></td>
                 <td><?= !empty($o['pickup_date']) ? date('d M Y', strtotime($o['pickup_date'])) : '-' ?></td>
@@ -31,7 +35,7 @@
                     </span>
                 </td>
             </tr>
-            <?php endforeach; if (empty($orders)) echo "<tr><td colspan='3' class='text-center'>No customer records found.</td></tr>"; ?>
+            <?php endforeach; ?>
         </tbody>
     </table>
 </div>

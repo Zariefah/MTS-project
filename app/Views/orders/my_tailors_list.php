@@ -21,8 +21,16 @@
         <tbody>
             <?php foreach ($orders as $o): ?>
             <tr>
-                <td><?= $o['tailor_name'] ?? '-' ?></td>
-                <td>#<?= $o['id'] ?></td>
+                <td>
+                    <a href="<?= base_url('orders/tailor_details/' . $o['selected_tailor_id']) ?>" class="fw-semibold text-decoration-none">
+                        <?= esc($o['tailor_name'] ?? '-') ?>
+                    </a>
+                </td>
+                <td>
+                    <a href="<?= base_url('orders?order_id=' . $o['id']) ?>" class="fw-semibold text-decoration-none">
+                        #<?= $o['id'] ?>
+                    </a>
+                </td>
                 <td><?= $o['completion_date'] ?? '-' ?></td>
                 <td><?= !empty($o['pickup_date']) ? date('d M Y', strtotime($o['pickup_date'])) : '-' ?></td>
                 <td>
@@ -31,7 +39,7 @@
                     </span>
                 </td>
             </tr>
-            <?php endforeach; if (empty($orders)) echo "<tr><td colspan='3' class='text-center'>No tailor records found.</td></tr>"; ?>
+            <?php endforeach; ?>
         </tbody>
     </table>
 </div>
