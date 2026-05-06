@@ -46,6 +46,9 @@ $routes->get('login2fa', 'AuthController::login2fa', ['as' => 'login2fa']);
 $routes->post('login2fa', 'AuthController::login2faDo');
 $routes->get('whoami', 'AuthController::whoami', ['filter' => 'login']);
 
+// Dashboard (role-based)
+$routes->get('dashboard', 'DashboardController::index', ['as' => 'dashboard', 'filter' => 'login']);
+
 // Database
 $routes->match(['GET', 'POST'], 'database', 'DatabaseController::database', ['as' => 'database', 'filter' => 'permission:database.edit']);
 

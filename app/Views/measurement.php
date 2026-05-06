@@ -45,13 +45,24 @@
                 </div>
             <?php endif; ?>
 
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                <div class="text-body-secondary small">
+                    Display unit:
+                    <span class="fw-semibold" id="unitLabelTop"></span>
+                </div>
+                <div class="btn-group" role="group" aria-label="Measurement unit switch">
+                    <button type="button" class="btn btn-outline-dark" id="btnUnitIn">Inch (in)</button>
+                    <button type="button" class="btn btn-outline-dark" id="btnUnitCm">Centimeter (cm)</button>
+                </div>
+            </div>
+
             <div class="row">
                 <div class="col-lg-5 mb-4 text-center">
                     <div class="sticky-top" style="top: 70px; z-index: 10;">
                         <div class="card bg-white border-0 shadow-sm">
                             <div class="card-body p-2">
-                                Make sure the measurements are taken in units <strong>Inch (In)</strong> according to the diagram.<br>
-                                <text class="text-muted small">Pastikan ukuran diambil dalam unit <strong>Inci (Inch)</strong> mengikut label rajah.</text>
+                                You can switch between <strong>inch</strong> and <strong>cm</strong>. Values are always saved consistently.<br>
+                                <text class="text-muted small">Anda boleh tukar unit <strong>inci</strong> dan <strong>cm</strong>. Nilai akan disimpan dengan betul.</text>
                             </div>
                         </div>
                         <img src="<?= base_url('images/measurements.png') ?>" class="img-fluid img-thumbnail rounded shadow mt-2" alt="Jemari Guide">
@@ -59,7 +70,7 @@
                 </div>
 
                 <div class="col-lg-7">
-                    <form action="<?= base_url('measurements/save') ?>" method="post"
+                    <form id="measurementForm" action="<?= base_url('measurements/save') ?>" method="post"
                         <?php if (in_roles('Tailor') && !empty($tailorCanEditMeasurements)): ?>
                             onsubmit="return confirm(<?= json_encode('Are you sure you want to update customer ' . $targetUser->username . '\'s body measurements?') ?>);"
                         <?php endif; ?>
@@ -68,6 +79,7 @@
                         <?php if (in_roles('Tailor') && !empty($tailorCanEditMeasurements)): ?>
                             <input type="hidden" name="target_user_id" value="<?= (int) $targetUser->id ?>">
                         <?php endif; ?>
+                        <input type="hidden" name="measurement_unit" id="measurementUnit" value="<?= esc(($unitPref ?? 'in') === 'cm' ? 'cm' : 'in') ?>">
 
                         <div class="row g-3">
                             <?php
@@ -94,11 +106,12 @@
                                             <span class="text-primary"><?= $code ?></span> - <?= $field[1] ?>
                                         </label>
                                         <div class="input-group">
-                                            <input type="number" step="0.1" name="<?= $field[0] ?>" 
+                                            <input type="number" step="0.1" name="<?= $field[0] ?>"
                                                    class="form-control" 
                                                    value="<?= $measurement[$field[0]] ?? '0' ?>"
+                                                   data-base-in="<?= $measurement[$field[0]] ?? '0' ?>"
                                                    <?= (in_roles('Tailor') && empty($tailorCanEditMeasurements)) ? 'readonly' : '' ?>>
-                                            <span class="input-group-text bg-white">in</span>
+                                            <span class="input-group-text bg-white unit-suffix">in</span>
                                         </div>
                                     </div>
                                 </div>
@@ -126,5 +139,86 @@
         </div>
     </div>
 </div>
+
+<script>
+    (function () {
+        const IN_TO_CM = 2.54;
+        const unitInput = document.getElementById('measurementUnit');
+        const labelTop = document.getElementById('unitLabelTop');
+        const btnIn = document.getElementById('btnUnitIn');
+        const btnCm = document.getElementById('btnUnitCm');
+        const form = document.getElementById('measurementForm');
+        const fields = Array.from(document.querySelectorAll('input[name]:not([type="hidden"])')).filter(el => el.type === 'number');
+        const suffixes = Array.from(document.querySelectorAll('.unit-suffix'));
+
+        function round1(n) {
+            return Math.round(n * 10) / 10;
+        }
+
+        function setActiveButtons(unit) {
+            const inActive = unit === 'in';
+            btnIn.classList.toggle('btn-dark', inActive);
+            btnIn.classList.toggle('btn-outline-dark', !inActive);
+            btnCm.classList.toggle('btn-dark', !inActive);
+            btnCm.classList.toggle('btn-outline-dark', inActive);
+        }
+
+        function updateSuffix(unit) {
+            suffixes.forEach(s => s.textContent = unit);
+            if (labelTop) labelTop.textContent = unit === 'cm' ? 'Centimeter (cm)' : 'Inch (in)';
+        }
+
+        function toDisplayValue(baseIn, unit) {
+            const n = parseFloat(baseIn);
+            if (!isFinite(n)) return '';
+            return unit === 'cm' ? String(round1(n * IN_TO_CM)) : String(round1(n));
+        }
+
+        function toBaseIn(displayValue, unit) {
+            const n = parseFloat(displayValue);
+            if (!isFinite(n)) return '';
+            return unit === 'cm' ? String(round1(n / IN_TO_CM)) : String(round1(n));
+        }
+
+        function applyUnit(unit) {
+            unitInput.value = unit;
+            setActiveButtons(unit);
+            updateSuffix(unit);
+            fields.forEach(el => {
+                const base = el.getAttribute('data-base-in') ?? '0';
+                // keep readonly inputs stable too, but don't overwrite empty invalids
+                el.value = toDisplayValue(base, unit);
+            });
+        }
+
+        // When user edits a field, we update the base-inch value so switching stays consistent
+        fields.forEach(el => {
+            el.addEventListener('input', () => {
+                const unit = unitInput.value === 'cm' ? 'cm' : 'in';
+                const baseIn = toBaseIn(el.value, unit);
+                if (baseIn !== '') {
+                    el.setAttribute('data-base-in', baseIn);
+                }
+            });
+        });
+
+        btnIn?.addEventListener('click', () => applyUnit('in'));
+        btnCm?.addEventListener('click', () => applyUnit('cm'));
+
+        // Ensure we always submit inches to backend (DB stays consistent)
+        form?.addEventListener('submit', () => {
+            const unit = unitInput.value === 'cm' ? 'cm' : 'in';
+            if (unit !== 'cm') return;
+            fields.forEach(el => {
+                const base = el.getAttribute('data-base-in') ?? toBaseIn(el.value, 'cm') ?? '0';
+                el.value = base; // submit inches
+            });
+        });
+
+        // Init from saved preference
+        const initial = unitInput.value === 'cm' ? 'cm' : 'in';
+        applyUnit(initial);
+    })();
+</script>
 
 <?= $this->endSection() ?>

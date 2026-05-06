@@ -12,6 +12,8 @@
                 <th>Order ID</th>
                 <th>Type</th>
                 <th>Material</th>
+                <th>Design Photos</th>
+                <th>Material Photos</th>
                 <th>Region</th>
                 <th>Expected Date</th>
                 <th>Action</th>
@@ -24,6 +26,44 @@
                 <td>#<?= $o['id'] ?></td>
                 <td><?= $o['garment_type'] ?></td>
                 <td><?= $o['material'] ?></td>
+                <td>
+                    <?php
+                    $designImages = [];
+                    if (!empty($o['design_images'])) {
+                        $designImages = json_decode($o['design_images'], true) ?: [];
+                    }
+                    ?>
+                    <?php if (!empty($designImages)): ?>
+                        <a href="<?= base_url('orders/customer_details/'.$o['id']) ?>" title="View design">
+                            <img
+                                src="<?= base_url('upload/orders/' . (int)$o['id'] . '/design/' . rawurlencode($designImages[0])) ?>"
+                                style="width:56px;height:56px;object-fit:cover;border-radius:10px"
+                                class="border bg-white"
+                            >
+                        </a>
+                    <?php else: ?>
+                        <span class="text-body-secondary">—</span>
+                    <?php endif; ?>
+                </td>
+                <td>
+                    <?php
+                    $materialImages = [];
+                    if (!empty($o['material_images'])) {
+                        $materialImages = json_decode($o['material_images'], true) ?: [];
+                    }
+                    ?>
+                    <?php if (!empty($materialImages)): ?>
+                        <a href="<?= base_url('orders/customer_details/'.$o['id']) ?>" title="View material photos">
+                            <img
+                                src="<?= base_url('upload/orders/' . (int)$o['id'] . '/material/' . rawurlencode($materialImages[0])) ?>"
+                                style="width:56px;height:56px;object-fit:cover;border-radius:10px"
+                                class="border bg-white"
+                            >
+                        </a>
+                    <?php else: ?>
+                        <span class="text-body-secondary">—</span>
+                    <?php endif; ?>
+                </td>
                 <td><?= esc($o['customer_region'] ?? '') ?: '—' ?></td>
                 <td><?= $o['expected_date'] ?></td>
                 <td>

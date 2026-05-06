@@ -4,6 +4,7 @@ namespace App\Controllers;
 
 use App\Models\MeasurementModel;
 use App\Models\UserModel;
+use App\Models\UserOptionModel;
 use Config\Database;
 
 class MeasurementController extends BaseController {
@@ -26,6 +27,7 @@ class MeasurementController extends BaseController {
     public function index($userId = null) {
         $model = model(MeasurementModel::class);
         $userModel = model(UserModel::class);
+        $userOptions = model(UserOptionModel::class);
 
         $orderId = $this->request->getGet('order_id');
 
@@ -41,7 +43,9 @@ class MeasurementController extends BaseController {
             'tailorCanEditMeasurements' => in_roles('Tailor')
                 && $this->tailorCanEditCustomerMeasurements((int) user_id(), (int) $targetId),
 
-            'orderId' => $orderId
+            'orderId' => $orderId,
+            // Viewer preference (not the target user)
+            'unitPref' => ($userOptions->getOption(['user_id' => (int) user_id(), 'option' => 'measurement_unit']) ?: 'in'),
         ];
 
         return $this->_render('measurement', $data);
@@ -49,6 +53,7 @@ class MeasurementController extends BaseController {
 
     public function save() {
         $model = model(MeasurementModel::class);
+        $userOptions = model(UserOptionModel::class);
         $postData = $this->request->getPost();
 
         if (in_roles('Customer')) {
@@ -69,6 +74,16 @@ class MeasurementController extends BaseController {
         }
 
         unset($postData['target_user_id']);
+
+        // Persist unit preference for the current viewer
+        $unitPref = $this->request->getPost('measurement_unit');
+        if (logged_in() && in_array($unitPref, ['in', 'cm'], true)) {
+            $userOptions->saveOption([
+                'user_id' => (int) user_id(),
+                'option' => 'measurement_unit',
+                'value' => $unitPref,
+            ]);
+        }
 
         $data = $postData;
         $existing = $model->where('user_id', $targetUserId)->first();

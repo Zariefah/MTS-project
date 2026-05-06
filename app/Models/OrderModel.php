@@ -8,7 +8,9 @@ class OrderModel extends Model {
     protected $allowedFields = [
         'customer_id', 'preferred_tailor_id', 'selected_tailor_id', 
         'garment_type', 'material', 'expected_date', 
-        'appointment_date', 'completion_date', 'pickup_date', 'status'
+        'appointment_date', 'completion_date', 'pickup_date', 'status',
+        // Uploaded images uploaded by customer
+        'design_images', 'material_images'
     ];
 
     public function getCustomerOrders($userId) {

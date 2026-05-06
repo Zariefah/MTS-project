@@ -1,6 +1,6 @@
 <?= $this->extend(config('App')->viewLayout) ?>
 <?= $this->section('main') ?>
-
+<!--  this one for bidding -->
 <?= view('partials/alert') ?>
 
 <div class="container py-4">
@@ -11,6 +11,16 @@
         </div>
         
         <div class="card-body">
+            <?php
+            $designImages = [];
+            if (!empty($order['design_images'])) {
+                $designImages = json_decode($order['design_images'], true) ?: [];
+            }
+            $materialImages = [];
+            if (!empty($order['material_images'])) {
+                $materialImages = json_decode($order['material_images'], true) ?: [];
+            }
+            ?>
             <ul class="nav nav-tabs mb-4" id="customerTab" role="tablist">
                 <li class="nav-item" role="presentation">
                     <button class="nav-link active" id="personal-tab" data-bs-toggle="tab" data-bs-target="#personal-pane" type="button" role="tab">
@@ -43,6 +53,46 @@
                             <table class="table table-sm table-borderless">
                                 <tr><td><strong>Garment Type:</strong></td><td><span class="badge bg-secondary"><?= $order['garment_type'] ?></span></td></tr>
                                 <tr><td><strong>Material:</strong></td><td><?= $order['material'] ?></td></tr>
+                                <tr>
+                                    <td><strong>Design Photos:</strong></td>
+                                    <td>
+                                        <?php if (!empty($designImages)): ?>
+                                            <div class="d-flex flex-wrap gap-2">
+                                                <?php foreach ($designImages as $img): ?>
+                                                    <a href="<?= base_url('upload/orders/' . (int) $order['id'] . '/design/' . rawurlencode($img)) ?>" target="_blank">
+                                                        <img
+                                                            src="<?= base_url('upload/orders/' . (int) $order['id'] . '/design/' . rawurlencode($img)) ?>"
+                                                            style="width:72px;height:72px;object-fit:cover;border-radius:10px"
+                                                            class="border bg-white"
+                                                        />
+                                                    </a>
+                                                <?php endforeach; ?>
+                                            </div>
+                                        <?php else: ?>
+                                            <span class="text-body-secondary">—</span>
+                                        <?php endif; ?>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Material Photos:</strong></td>
+                                    <td>
+                                        <?php if (!empty($materialImages)): ?>
+                                            <div class="d-flex flex-wrap gap-2">
+                                                <?php foreach ($materialImages as $img): ?>
+                                                    <a href="<?= base_url('upload/orders/' . (int) $order['id'] . '/material/' . rawurlencode($img)) ?>" target="_blank">
+                                                        <img
+                                                            src="<?= base_url('upload/orders/' . (int) $order['id'] . '/material/' . rawurlencode($img)) ?>"
+                                                            style="width:72px;height:72px;object-fit:cover;border-radius:10px"
+                                                            class="border bg-white"
+                                                        />
+                                                    </a>
+                                                <?php endforeach; ?>
+                                            </div>
+                                        <?php else: ?>
+                                            <span class="text-body-secondary">—</span>
+                                        <?php endif; ?>
+                                    </td>
+                                </tr>
                                 <tr><td><strong>Expected Date:</strong></td><td><?= $order['expected_date'] ?></td></tr>
                                 <tr><td><strong>Status:</strong></td><td><span class="badge bg-info"><?= $order['status'] ?></span></td></tr>
                             </table>
@@ -51,15 +101,22 @@
                 </div>
 
                 <div class="tab-pane fade" id="measurement-pane" role="tabpanel" aria-labelledby="measurement-tab">
-                    <div class="mb-3">
-                        <a href="<?= base_url('measurements/' . (int) $customer->id) ?>" class="btn btn-sm btn-outline-primary">
-                            <i class="bi bi-pencil-square me-1"></i> Edit full measurement form
-                        </a>
-                    </div>
                     <?php if ($measurements): ?>
+                        <input type="hidden" id="measurementUnit" value="in">
                         <div class="alert alert-light border small mb-3">
-                            <i class="bi bi-info-circle me-1"></i> Ukuran dalam unit <strong>Inci (Inch)</strong> .
+                            <i class="bi bi-info-circle me-1"></i> Display unit:
+                                <span class="fw-semibold" id="unitLabelTop"></span>
                         </div>
+                        
+                        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                            <div class="text-body-secondary small">
+                            </div>
+                            <div class="btn-group" role="group" aria-label="Measurement unit switch">
+                                <button type="button" class="btn btn-outline-dark" id="btnUnitIn">Inch (in)</button>
+                                <button type="button" class="btn btn-outline-dark" id="btnUnitCm">Centimeter (cm)</button>
+                            </div>
+                        </div>
+
                         <div class="row g-3">
                             <?php 
                             $m_fields = [
@@ -69,11 +126,18 @@
                                 'pinggang_ke_lutut' => 'Pinggang ke Lutut', 'labuh_kain' => 'Labuh Kain',
                                 'labuh_tangan' => 'Labuh Tangan', 'lilitan_kekek' => 'Lilitan Kekek', 'lubang_tangan' => 'Lubang Tangan'
                             ];
-                            foreach ($m_fields as $key => $label): ?>
+                            foreach ($m_fields as $key => $label): 
+                                $value = $measurements[$key] ?? '0.00';
+                            ?>
                                 <div class="col-md-4 col-6">
                                     <div class="p-2 border rounded bg-white shadow-sm">
                                         <small class="text-muted d-block"><?= $label ?></small>
-                                        <span class="fw-bold"><?= $measurements[$key] ?? '0.00' ?> in</span>
+                                        <div class="input-group input-group-sm">
+                                            <input type="number" step="0.01" class="form-control form-control-sm" 
+                                                   value="<?= $value ?>" readonly 
+                                                   data-base-in="<?= $value ?>">
+                                            <span class="input-group-text unit-suffix">in</span>
+                                        </div>
                                     </div>
                                 </div>
                             <?php endforeach; ?>
@@ -85,6 +149,11 @@
                     <?php endif; ?>
                 </div>
             </div>
+        </div>
+
+        <div class="alert alert-info border-0 shadow-sm mx-3 mt-0 mb-3">
+            <i class="bi bi-eye-fill me-2"></i>
+            Please review the <strong>Design Photos</strong> and <strong>Material Photos</strong> above before you submit a bid.
         </div>
 
         <div class="card-footer bg-white text-end p-3">
@@ -137,5 +206,57 @@
         </form>
     </div>
 </div>
+
+<script>
+    (function () {
+        const IN_TO_CM = 2.54;
+        const unitInput = document.getElementById('measurementUnit');
+        const labelTop = document.getElementById('unitLabelTop');
+        const btnIn = document.getElementById('btnUnitIn');
+        const btnCm = document.getElementById('btnUnitCm');
+        const fields = Array.from(document.querySelectorAll('input[type="number"][readonly]'));
+        const suffixes = Array.from(document.querySelectorAll('.unit-suffix'));
+
+        function round1(n) {
+            return Math.round(n * 10) / 10;
+        }
+
+        function setActiveButtons(unit) {
+            const inActive = unit === 'in';
+            btnIn.classList.toggle('btn-dark', inActive);
+            btnIn.classList.toggle('btn-outline-dark', !inActive);
+            btnCm.classList.toggle('btn-dark', !inActive);
+            btnCm.classList.toggle('btn-outline-dark', inActive);
+        }
+
+        function updateSuffix(unit) {
+            suffixes.forEach(s => s.textContent = unit);
+            if (labelTop) labelTop.textContent = unit === 'cm' ? 'Centimeter (cm)' : 'Inch (in)';
+        }
+
+        function toDisplayValue(baseIn, unit) {
+            const n = parseFloat(baseIn);
+            if (!isFinite(n)) return '';
+            return unit === 'cm' ? String(round1(n * IN_TO_CM)) : String(round1(n));
+        }
+
+        function applyUnit(unit) {
+            unitInput.value = unit;
+            setActiveButtons(unit);
+            updateSuffix(unit);
+            fields.forEach(el => {
+                const base = el.getAttribute('data-base-in') ?? '0';
+                el.value = toDisplayValue(base, unit);
+            });
+        }
+
+        btnIn?.addEventListener('click', () => applyUnit('in'));
+        btnCm?.addEventListener('click', () => applyUnit('cm'));
+
+        // Init from saved preference
+        const initial = unitInput.value === 'cm' ? 'cm' : 'in';
+        applyUnit(initial);
+    })();
+</script>
 
 <?= $this->endSection() ?>

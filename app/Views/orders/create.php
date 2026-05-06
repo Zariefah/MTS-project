@@ -36,7 +36,7 @@
         <?php endif; ?>
         
         <div class="<?= $tailor ? 'col-md-8' : 'col-md-12' ?>">
-            <form action="<?= base_url('orders/store') ?>" method="post" class="card shadow-sm p-4">
+            <form action="<?= base_url('orders/store') ?>" method="post" class="card shadow-sm p-4" enctype="multipart/form-data">
                 <?= csrf_field() ?>
                 <input type="hidden" name="preferred_tailor_id" value="<?= $preferred_id ?>">
                 <h5>New Order Details</h5>
@@ -51,17 +51,40 @@
                 </div>
                 <div class="mb-3">
                     <label>Material</label>
-                    <select name="material" class="form-select" required>
+                    <select name="material" class="form-select" required id="materialSelect">
                         <option value="">-- Select material --</option>
                         <?php foreach ($material_options as $mat): ?>
                             <option value="<?= esc($mat) ?>"><?= esc($mat) ?></option>
                         <?php endforeach; ?>
+                        <option value="__other__">Other</option>
                     </select>
+                    <input
+                        type="text"
+                        name="material_other"
+                        id="materialOtherInput"
+                        class="form-control mt-2 d-none"
+                        placeholder="Type your material (e.g. Polyester blend, Denim, etc.)"
+                    >
                 </div>
                 <div class="mb-3">
                     <label>Expected Completion</label>
                     <input type="date" name="expected_date" class="form-control" required>
                 </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Desired Design Photos</label>
+                    <p class="text-muted small mb-2">Upload clear photos of the design you want (so tailors can confirm capability before bidding).</p>
+                    <input type="file" name="design_images[]" class="form-control" accept="image/*" multiple required>
+                    <div id="designPreview" class="d-flex flex-wrap gap-2 mt-2"></div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Material Photos</label>
+                    <p class="text-muted small mb-2">Upload the material/cloth photos (so tailors can confirm the fabric is correct).</p>
+                    <input type="file" name="material_images[]" class="form-control" accept="image/*" multiple required>
+                    <div id="materialPreview" class="d-flex flex-wrap gap-2 mt-2"></div>
+                </div>
+
                 <div class="mb-3">
                     <label class="form-label">Offered Appointment Dates (select multiple)</label>
                     <p class="text-muted small mb-2">Click dates on the calendar to add or remove them <strong>(Pick 3 Dates Maximum)</strong>.</p>
@@ -126,5 +149,105 @@
         }
     });
 })();
+</script>
+
+<script>
+  (function () {
+    const materialSelect = document.getElementById('materialSelect');
+    const materialOtherInput = document.getElementById('materialOtherInput');
+
+    function syncMaterialOther() {
+      const isOther = materialSelect && materialSelect.value === '__other__';
+      if (isOther) {
+        materialOtherInput.classList.remove('d-none');
+        materialOtherInput.required = true;
+      } else {
+        materialOtherInput.classList.add('d-none');
+        materialOtherInput.required = false;
+        materialOtherInput.value = '';
+      }
+    }
+
+    if (materialSelect) {
+      materialSelect.addEventListener('change', syncMaterialOther);
+      syncMaterialOther();
+    }
+
+    // Quick preview helpers
+    function bindPreview(inputId, previewId) {
+      const inputEl = document.getElementById(inputId);
+      const previewEl = document.getElementById(previewId);
+      if (!inputEl || !previewEl) return;
+
+      inputEl.addEventListener('change', function () {
+        previewEl.innerHTML = '';
+        const files = inputEl.files ? Array.from(inputEl.files) : [];
+        files.slice(0, 6).forEach((f) => {
+          const reader = new FileReader();
+          reader.onload = function (ev) {
+            const img = document.createElement('img');
+            img.src = ev.target.result;
+            img.style.width = '64px';
+            img.style.height = '64px';
+            img.style.objectFit = 'cover';
+            img.style.borderRadius = '8px';
+            img.className = 'border bg-white';
+            previewEl.appendChild(img);
+          };
+          reader.readAsDataURL(f);
+        });
+      });
+    }
+
+    // Input elements are anonymous in HTML; use query by name
+    const designInput = document.querySelector('input[name="design_images[]"]');
+    const materialInput = document.querySelector('input[name="material_images[]"]');
+
+    if (designInput) {
+      designInput.addEventListener('change', function () {
+        const previewEl = document.getElementById('designPreview');
+        if (!previewEl) return;
+        previewEl.innerHTML = '';
+        const files = designInput.files ? Array.from(designInput.files) : [];
+        files.slice(0, 6).forEach((f) => {
+          const reader = new FileReader();
+          reader.onload = function (ev) {
+            const img = document.createElement('img');
+            img.src = ev.target.result;
+            img.style.width = '64px';
+            img.style.height = '64px';
+            img.style.objectFit = 'cover';
+            img.style.borderRadius = '8px';
+            img.className = 'border bg-white';
+            previewEl.appendChild(img);
+          };
+          reader.readAsDataURL(f);
+        });
+      });
+    }
+
+    if (materialInput) {
+      materialInput.addEventListener('change', function () {
+        const previewEl = document.getElementById('materialPreview');
+        if (!previewEl) return;
+        previewEl.innerHTML = '';
+        const files = materialInput.files ? Array.from(materialInput.files) : [];
+        files.slice(0, 6).forEach((f) => {
+          const reader = new FileReader();
+          reader.onload = function (ev) {
+            const img = document.createElement('img');
+            img.src = ev.target.result;
+            img.style.width = '64px';
+            img.style.height = '64px';
+            img.style.objectFit = 'cover';
+            img.style.borderRadius = '8px';
+            img.className = 'border bg-white';
+            previewEl.appendChild(img);
+          };
+          reader.readAsDataURL(f);
+        });
+      });
+    }
+  })();
 </script>
 <?= $this->endSection() ?>

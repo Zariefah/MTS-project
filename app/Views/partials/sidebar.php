@@ -9,7 +9,7 @@
   <ul class="sidebar-nav">
     <!--Home-->
     <li class="sidebar-item">
-      <a href="<?= base_url() ?>" class="sidebar-link">
+      <a href="<?= logged_in() ? base_url('dashboard') : base_url() ?>" class="sidebar-link">
         <i class="bi bi-house"></i>
         <span><?= lang('Navbar.home.title') ?></span>
       </a>

@@ -22,9 +22,12 @@ class HomeController extends BaseController {
    *
    * Show root/home page.
    *
-   * @return string
+   * @return mixed
    */
-  public function index(): string {
+  public function index(): mixed {
+    if (logged_in()) {
+      return redirect()->to(route_to('dashboard'));
+    }
     $data = [
       'page' => lang('App.home.title'),
     ];

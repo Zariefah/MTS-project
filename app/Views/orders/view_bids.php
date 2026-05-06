@@ -4,6 +4,51 @@
     <h4>Tailors Bidding for Order #<?= $order['id'] ?></h4>
     <p class="text-muted"><?= $order['garment_type'] ?> (<?= $order['material'] ?>)</p>
 
+    <?php
+    $designImages = [];
+    if (!empty($order['design_images'])) {
+        $designImages = json_decode($order['design_images'], true) ?: [];
+    }
+    $materialImages = [];
+    if (!empty($order['material_images'])) {
+        $materialImages = json_decode($order['material_images'], true) ?: [];
+    }
+    ?>
+
+    <?php if (!empty($designImages) || !empty($materialImages)): ?>
+        <div class="mb-3">
+            <?php if (!empty($designImages)): ?>
+                <div class="fw-bold mb-1">Design Photos</div>
+                <div class="d-flex flex-wrap gap-2">
+                    <?php foreach ($designImages as $img): ?>
+                        <a href="<?= base_url('upload/orders/' . (int)$order['id'] . '/design/' . rawurlencode($img)) ?>" target="_blank">
+                            <img
+                                src="<?= base_url('upload/orders/' . (int)$order['id'] . '/design/' . rawurlencode($img)) ?>"
+                                style="width:72px;height:72px;object-fit:cover;border-radius:10px"
+                                class="border bg-white"
+                            >
+                        </a>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
+
+            <?php if (!empty($materialImages)): ?>
+                <div class="fw-bold mt-3 mb-1">Material Photos</div>
+                <div class="d-flex flex-wrap gap-2">
+                    <?php foreach ($materialImages as $img): ?>
+                        <a href="<?= base_url('upload/orders/' . (int)$order['id'] . '/material/' . rawurlencode($img)) ?>" target="_blank">
+                            <img
+                                src="<?= base_url('upload/orders/' . (int)$order['id'] . '/material/' . rawurlencode($img)) ?>"
+                                style="width:72px;height:72px;object-fit:cover;border-radius:10px"
+                                class="border bg-white"
+                            >
+                        </a>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
+        </div>
+    <?php endif; ?>
+
     <div class="row">
         <?php foreach($bids as $b): ?>
         <div class="col-md-4">

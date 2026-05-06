@@ -119,17 +119,138 @@ class OrderController extends BaseController {
         $model = model(OrderModel::class);
         $db = \Config\Database::connect();
 
+        $hasDesignColumn = $db->fieldExists('design_images', 'orders');
+        $hasMaterialColumn = $db->fieldExists('material_images', 'orders');
+
+        // Material handling: allow selecting "Other" with free text.
+        $material = $this->request->getPost('material');
+        $materialOther = trim((string) $this->request->getPost('material_other'));
+        if ($material === '__other__') {
+            if ($materialOther === '') {
+                return redirect()->back()->withInput()->with('error', 'Please enter your custom material.');
+            }
+            $material = $materialOther;
+        }
+
+        // Upload handling: design images + material images
+        $designImagesFiles = $this->request->getFileMultiple('design_images');
+        $materialImagesFiles = $this->request->getFileMultiple('material_images');
+
+        $hasValidDesign = false;
+        if (is_array($designImagesFiles)) {
+            foreach ($designImagesFiles as $f) {
+                if ($f && $f->isValid() && $f->getSize() > 0) {
+                    $hasValidDesign = true;
+                    break;
+                }
+            }
+        }
+        $hasValidMaterial = false;
+        if (is_array($materialImagesFiles)) {
+            foreach ($materialImagesFiles as $f) {
+                if ($f && $f->isValid() && $f->getSize() > 0) {
+                    $hasValidMaterial = true;
+                    break;
+                }
+            }
+        }
+
+        if (!$hasValidDesign) {
+            return redirect()->back()->withInput()->with('error', 'Please upload at least one design picture.');
+        }
+        if (!$hasValidMaterial) {
+            return redirect()->back()->withInput()->with('error', 'Please upload at least one material picture.');
+        }
+
         $orderData = [
             'customer_id' => user_id(),
             'preferred_tailor_id' => $this->request->getPost('preferred_tailor_id') ?: null,
             'garment_type' => $this->request->getPost('type'),
-            'material' => $this->request->getPost('material'),
+            'material' => $material,
             'expected_date' => $this->request->getPost('expected_date'),
-            'status' => 'Pending'
+            'status' => 'Pending',
         ];
+
+        // Placeholders; updated after we know the $orderId (only if columns exist).
+        if ($hasDesignColumn) {
+            $orderData['design_images'] = null;
+        }
+        if ($hasMaterialColumn) {
+            $orderData['material_images'] = null;
+        }
 
         $model->save($orderData);
         $orderId = $model->getInsertID();
+
+        // Save uploaded files under public upload folder:
+        // public/upload/orders/{orderId}/design/
+        // public/upload/orders/{orderId}/material/
+        $baseDir = FCPATH . 'upload/orders/' . $orderId . '/';
+        $designDir = $baseDir . 'design/';
+        $materialDir = $baseDir . 'material/';
+
+        if (!is_dir($designDir)) {
+            mkdir($designDir, 0775, true);
+        }
+        if (!is_dir($materialDir)) {
+            mkdir($materialDir, 0775, true);
+        }
+
+        $designFileNames = [];
+        if (is_array($designImagesFiles)) {
+            $i = 0;
+            foreach ($designImagesFiles as $f) {
+                if (!$f || !$f->isValid() || $f->getSize() <= 0) {
+                    continue;
+                }
+
+                $ext = strtolower($f->getClientExtension() ?: 'jpg');
+                if (!in_array($ext, ['jpg', 'jpeg', 'png', 'webp'], true)) {
+                    continue;
+                }
+
+                $i++;
+                $filename = 'design_' . $i . '_' . time() . '.' . $ext;
+                $f->move($designDir, $filename);
+                $designFileNames[] = $filename;
+            }
+        }
+
+        $materialFileNames = [];
+        if (is_array($materialImagesFiles)) {
+            $i = 0;
+            foreach ($materialImagesFiles as $f) {
+                if (!$f || !$f->isValid() || $f->getSize() <= 0) {
+                    continue;
+                }
+
+                $ext = strtolower($f->getClientExtension() ?: 'jpg');
+                if (!in_array($ext, ['jpg', 'jpeg', 'png', 'webp'], true)) {
+                    continue;
+                }
+
+                $i++;
+                $filename = 'material_' . $i . '_' . time() . '.' . $ext;
+                $f->move($materialDir, $filename);
+                $materialFileNames[] = $filename;
+            }
+        }
+
+        // If everything invalidated for some reason, keep it safe.
+        if (empty($designFileNames) || empty($materialFileNames)) {
+            return redirect()->back()->withInput()->with('error', 'Upload failed. Please upload valid image files.');
+        }
+
+        $updateData = [];
+        if ($hasDesignColumn) {
+            $updateData['design_images'] = json_encode($designFileNames);
+        }
+        if ($hasMaterialColumn) {
+            $updateData['material_images'] = json_encode($materialFileNames);
+        }
+        if (!empty($updateData)) {
+            $model->update($orderId, $updateData);
+        }
 
         $offeredDates = $this->request->getPost('offered_dates');
         if (is_array($offeredDates)) {
